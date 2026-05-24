@@ -4,17 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>印刷入稿データ チェックリスト</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f4f0;
+    --bg: #f5f4f1;
     --surface: #ffffff;
-    --surface2: #fafaf8;
-    --border: #e8e5de;
-    --text-primary: #1a1a1a;
-    --text-secondary: #666660;
-    --text-muted: #999992;
-    --accent: #2c5f8a;
-    --accent-light: #e8f0f7;
+    --surface2: #f8f7f5;
+    --border: #e5e3de;
+    --border2: #d4d1cb;
+    --text-primary: #1a1915;
+    --text-secondary: #5a5850;
+    --text-muted: #9a9890;
+    --accent: #e8613a;
+    --accent-hover: #d45530;
+    --accent-light: #fdf0ec;
     --required: #b83228;
     --required-bg: #fdf0ef;
     --required-header: #f9eae8;
@@ -23,13 +28,13 @@
     --recommended-bg: #fdf8e8;
     --recommended-header: #faf5e0;
     --recommended-border: #ddd080;
-    --check-color: #2e7d52;
-    --check-bg: #edf7f1;
-    --hint-bg: #f0f4f8;
-    --hint-border: #b8cfe0;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
-    --shadow: 0 1px 4px rgba(0,0,0,0.09);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+    --check-color: #2e9e6a;
+    --check-bg: #edf7f2;
+    --hint-bg: #f8f7f5;
+    --hint-border: #d4d1cb;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
     --radius: 8px;
     --radius-sm: 5px;
     --radius-lg: 12px;
@@ -38,7 +43,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+    font-family: 'Noto Sans JP', "Hiragino Sans", "Yu Gothic UI", sans-serif;
     background: var(--bg);
     color: var(--text-primary);
     min-height: 100vh;
@@ -114,6 +119,9 @@
     white-space: nowrap;
   }
   .reset-btn-header:hover { background: rgba(255,255,255,0.2); }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
   /* ── Page layout ── */
   .page {
@@ -313,7 +321,7 @@
   .item-card.open-hint .hint-toggle {
     background: var(--accent-light);
     color: var(--accent);
-    border-color: var(--hint-border);
+    border-color: var(--accent);
   }
 
   /* Hint panel */
