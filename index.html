@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>印刷入稿データ チェックリスト</title>
+<title>入稿データ チェックリスト</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -219,11 +219,11 @@
   }
   .priority-section:has(.priority-header.required) .priority-body {
     border-color: var(--required-border);
-    background: var(--required-bg);
+    background: var(--surface);
   }
   .priority-section:has(.priority-header.recommended) .priority-body {
     border-color: var(--recommended-border);
-    background: var(--recommended-bg);
+    background: var(--surface);
   }
 
   /* ── Sub-category group (小カテゴリ) ── */
@@ -304,12 +304,12 @@
   .item-label { flex: 1; font-size: 13.5px; transition: color 0.15s; }
 
   .hint-toggle {
-    width: 26px; height: 26px;
-    border-radius: 50%;
+    padding: 3px 9px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    background: #fff;
+    background: transparent;
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -317,8 +317,9 @@
     flex-shrink: 0;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
     font-family: inherit;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1;
+    white-space: nowrap;
   }
   .hint-toggle:hover,
   .item-card.open-hint .hint-toggle {
@@ -353,12 +354,12 @@
 
 <header>
   <div class="header-left">
-    <h1>印刷入稿データ チェックリスト</h1>
+    <h1 onclick="window.scrollTo({top:0,behavior:'smooth'})" style="cursor:pointer;" title="トップへ戻る">入稿データ チェックリスト</h1>
     <p>入稿前に全項目を確認してください</p>
   </div>
   <div class="header-right">
     <div class="progress-wrap">
-      <span class="progress-text" id="progressText">0 / 21 完了</span>
+      <span class="progress-text" id="progressText">0 / 24 完了</span>
       <div class="progress-bar-outer">
         <div class="progress-bar-inner" id="progressBar"></div>
       </div>
@@ -376,27 +377,32 @@
 
 <script>
 const ITEMS = [
-  { id:1,  cat:"データ整理", label:"必要データが一つのフォルダに集約されている。",                     priority:"必須", hint:'ショートカット「Alt+Shift+Ctrl+P」を使用し、データをパッケージする。' },
-  { id:2,  cat:"文字",       label:"全てのテキストがアウトライン化されている。",                       priority:"必須", hint:'PDF入稿でフォント埋め込み済なら不要（印刷所ごとに変わる）。' },
-  { id:3,  cat:"カラー",     label:"ドキュメントとリンク画像のカラーモードがCMYKに設定されている。",    priority:"必須", hint:'リンク画像も同様の処理を行うこと。' },
-  { id:4,  cat:"画像",       label:"画像のリンクが外れていない、または埋め込みされている。",            priority:"必須", hint:'入稿用デザインデータとリンク画像フォルダは必ず同一階層に格納すること。' },
-  { id:5,  cat:"画像",       label:"リンク画像の解像度が適切に設定されている。",                       priority:"必須", hint:'基本的に300〜350dpiが推奨。ポスターなど大サイズの場合は解像度を適宜下げる。' },
-  { id:6,  cat:"版下",       label:"適切なサイズでトリムマークが作成されている。",                     priority:"必須", hint:'線に色指定が入っていると、線幅込みで作成されてしまうので注意。' },
-  { id:7,  cat:"版下",       label:"塗りたし3mmが確保されている。",                                   priority:"必須", hint:'断裁ズレで白地が出ないよう、背景を外側に3mm伸ばす。' },
-  { id:8,  cat:"特殊加工",   label:"トムソン加工やシール印刷などの場合、指定の入稿仕様に沿っている。",  priority:"必須", hint:'カットパスの作成や専用レイヤーの作成、塗りたしの指定が異なります。' },
-  { id:9,  cat:"保存形式",   label:"PDF入稿の場合、保存形式がPDF x-1aに設定されている。",             priority:"必須", hint:'入稿規定に沿った標準的な保存形式ですが、印刷所によって異なるので注意。' },
-  { id:10, cat:"保存形式",   label:"印刷会社に対応するバージョンでデータが作成されている。",            priority:"必須", hint:'新聞広告など印刷所によって古いバージョン形式で保存する必要があります。' },
-  { id:11, cat:"データ整理", label:"孤立点が削除されている。",                                        priority:"推奨", hint:'選択時に邪魔になるため。現在の出力機ではほぼ問題なし。' },
-  { id:12, cat:"データ整理", label:"ロックが全解除されている。",                                      priority:"推奨", hint:'PDF入稿時は不要。Ai入稿時は整理のために推奨。' },
-  { id:13, cat:"データ整理", label:"非表示のオブジェクトがなく、全て表示されている。",                 priority:"推奨", hint:'不要なレイヤーが残っていないかの確認。' },
-  { id:14, cat:"文字",       label:"異体字が反映されている。",                                        priority:"推奨", hint:'フォントによって異体字が登録されていない場合があるので注意。' },
-  { id:15, cat:"カラー",     label:"不要なスウォッチが削除されている。",                               priority:"推奨", hint:'不使用の特色など、未使用のスウォッチは可能な限り削除すること。' },
-  { id:16, cat:"カラー",     label:"0.25pt以下の細い線が使用されていないか確認する。",                 priority:"推奨", hint:'細い線は印刷で消える可能性があるため確認。' },
-  { id:17, cat:"カラー",     label:"オーバープリントの設定が解除されている。",                         priority:"推奨", hint:'意図しない色の出方が発生するため、属性パネルでチェックが外れているか確認。' },
-  { id:18, cat:"カラー",     label:"黒100%によるオーバープリントが考慮されている。",                   priority:"推奨", hint:'黒100%は自動的にオーバープリントになるため、それを考慮したデータの作りか確認。' },
-  { id:19, cat:"画像",       label:"画像サイズが適切にリサイズされている。",                           priority:"推奨", hint:'大きすぎないように縮小させることで、画質向上とデータ容量が削減できる。' },
-  { id:20, cat:"版下",       label:"版下データ外に不要なデータが残っていない。",                       priority:"推奨", hint:'データ容量の削減および、引き継ぎ時の混乱を避ける。' },
-  { id:21, cat:"保存形式",   label:"別名保存時に「PDFの互換性」のチェックが外れている。",              priority:"推奨", hint:'データ容量を大幅に削減できるが、WEB上の入稿データチェック機能を通す場合は必須の場合がある。' },
+  // ── 必須 ──
+  { id:1,  cat:"データ整理", label:"パッケージ機能を使い、入稿データをまとめた。",                                                                           priority:"必須", hint:'メニューのファイル内もしくはショートカット「Alt+Shift+Ctrl+P」で機能が使えます。InDesignにも同様の機能があります。' },
+  { id:2,  cat:"データ整理", label:"入稿時にオンラインの自動データチェックを用いる場合、aiデータの保存時に「PDF互換ファイルを作成」にチェックを入れた。",     priority:"必須", hint:'別名保存時にチェック欄が表示されます。' },
+  { id:3,  cat:"データ整理", label:"非表示のオブジェクトがなく、全て表示されている。",                                                                         priority:"必須", hint:'「cmd+option+3」で全ての隠れオブジェクトを表示し、アウトライン化ミスを防いだり、不要な画像リンクを削除しましょう。' },
+  { id:4,  cat:"文字",       label:"全てのテキストがアウトライン化されている。",                                                                               priority:"必須", hint:'PDF x-1aによるフォント埋め込み、またはInDesignデータの場合は必ずしもアウトラインは必須ではない。' },
+  { id:5,  cat:"文字",       label:"テキストフレームのオーバーセット（テキストのあふれ）がないか確認した。",                                                   priority:"必須", hint:'オーバーセットはテキストが枠外に溢れている状態です。印刷データに含まれないため、意図しない文字落ちが発生します。' },
+  { id:6,  cat:"カラー",     label:"ドキュメントとリンク画像のカラーモードがCMYKに設定されている。",                                                           priority:"必須", hint:'リンク画像も同様の処理を行うこと。' },
+  { id:7,  cat:"画像",       label:"画像のリンクが外れていない、または埋め込みされている。",                                                                   priority:"必須", hint:'入稿用デザインデータとリンク画像フォルダは必ず同一階層に格納すること。パッケージ機能で自動的にセットされます。' },
+  { id:8,  cat:"画像",       label:"リンク画像の解像度が適切に設定されている（300〜350dpi）。",                                                               priority:"必須", hint:'A2以上の大サイズデータの場合、適宜解像度を下げた方が綺麗に印刷されます。データサイズも削減できます。' },
+  { id:9,  cat:"版下",       label:"適切なサイズでトリムマークが作成されている。",                                                                             priority:"必須", hint:'トリムマーク作成する際オブジェクトに線が入っていると線幅込みで作成されてしまうので注意。' },
+  { id:10, cat:"版下",       label:"塗りたし3mmが確保されている。",                                                                                           priority:"必須", hint:'断裁ズレで白地が出ないよう、背景を外側に3mm伸ばす。' },
+  { id:11, cat:"特殊加工",   label:"トムソン加工やシール印刷などの場合、指定の入稿仕様に沿っている。",                                                         priority:"必須", hint:'カットパスの作成、専用レイヤーの作成、塗りたしの指定は印刷会社によって異なります。' },
+  { id:12, cat:"保存形式",   label:"PDF入稿の場合、保存形式がPDF x-1aに設定されている。",                                                                     priority:"必須", hint:'入稿規定に沿った標準的な保存形式ですが、印刷所によって異なるので注意。' },
+  { id:13, cat:"保存形式",   label:"印刷会社に対応するバージョンでデータが作成されている。",                                                                   priority:"必須", hint:'新聞広告など印刷所によって古いバージョン形式で保存する必要があります。' },
+  // ── 推奨 ──
+  { id:14, cat:"データ整理", label:"孤立点が削除されている。",                                                                                                 priority:"推奨", hint:'現在の出力機ではほぼ問題ないが、データを流用する際の邪魔になったり、特色指定が残っていると入稿時にエラーを起こす原因になります。' },
+  { id:15, cat:"データ整理", label:"全てのオブジェクトのロックが解除されている。",                                                                             priority:"推奨", hint:'一部フォントだけアウトラインがとられていないなどを防止するため、「cmd+option+2」で予めロックを解除しておきましょう。' },
+  { id:16, cat:"文字",       label:"異体字が反映される書体を使用した。",                                                                                       priority:"推奨", hint:'髙など形が違う漢字が登録されていない書体を使っている場合は、該当文字のみ書体を変えて正式名をで表示しましょう。' },
+  { id:17, cat:"カラー",     label:"不要なスウォッチが削除されている。",                                                                                       priority:"推奨", hint:'不使用の特色など、未使用のスウォッチは可能な限り削除すること。' },
+  { id:18, cat:"カラー",     label:"インキの総量（CMYK値の合計）が350%を超える箇所がない。",                                                                   priority:"推奨", hint:'インキの総量が多すぎると、乾燥不良や裏移りの原因になります。特に新聞印刷では細かい指定があるので予め入稿仕様を取り寄せること。' },
+  { id:19, cat:"カラー",     label:"線幅0.2pt以上に設定した。",                                                                                               priority:"推奨", hint:'細すぎる線は印刷で消える可能性があります。0.2pt未満の線がないか確認してください。' },
+  { id:20, cat:"カラー",     label:"オーバープリントの設定が解除されている。",                                                                                 priority:"推奨", hint:'意図しない色の出方が発生する原因になります。オブジェクトを選択した状態で属性パネルをチェックすることで状態を確認できます。' },
+  { id:21, cat:"カラー",     label:"黒100%によるオーバープリントを考慮してデザインされている。",                                                               priority:"推奨", hint:'黒100%は自動的にオーバープリントになるため、色の境目にスミ100%のオブジェクトを置かないデータの作りを心がけましょう。' },
+  { id:22, cat:"画像",       label:"画像サイズが適切にリサイズされている。",                                                                                   priority:"推奨", hint:'印刷画質の向上と全体のデータサイズが削減できます。' },
+  { id:23, cat:"版下",       label:"版下データ外に不要なデータが残っていない。",                                                                               priority:"推奨", hint:'データサイズの削減、および、引き継ぎ時の混乱を避けるため綺麗にしておきましょう。' },
+  { id:24, cat:"保存形式",   label:"オンライン上のデータチェックを用いないため「PDF互換ファイルを作成」のチェックを外して保存した。",                           priority:"推奨", hint:'データ容量を大幅に削減できますが、オンライン上の入稿データチェック機能を使う場合はチェックが必要です。' },
 ];
 
 const CAT_COLORS = {
@@ -410,19 +416,19 @@ const CAT_COLORS = {
 };
 
 const PRIORITIES = [
-  { key: "必須", cls: "required",     desc: "入稿前に必ず確認してください" },
-  { key: "推奨", cls: "recommended",  desc: "品質向上・トラブル防止のために推奨" },
+  { key: "必須", cls: "required",     desc: "印刷トラブル防止のため、入稿前に必ず確認してください。" },
+  { key: "推奨", cls: "recommended",  desc: "品質向上・データを流用する際の使いやすさの観点で確認してください。" },
 ];
 
 const state = { checked: new Set(), openHint: null };
 
 try {
-  const saved = localStorage.getItem('printChecklist_v2');
+  const saved = localStorage.getItem('printChecklist_v3');
   if (saved) JSON.parse(saved).forEach(id => state.checked.add(id));
 } catch(e) {}
 
 function save() {
-  try { localStorage.setItem('printChecklist_v2', JSON.stringify([...state.checked])); } catch(e) {}
+  try { localStorage.setItem('printChecklist_v3', JSON.stringify([...state.checked])); } catch(e) {}
 }
 
 function toggleCheck(id, e) {
@@ -449,7 +455,7 @@ function refreshCard(id) {
   card.classList.toggle('open-hint', isOpen);
   if (hintEl) hintEl.classList.toggle('open', isOpen);
   const btn = card.querySelector('.hint-toggle');
-  if (btn) btn.textContent = isOpen ? '▲' : '?';
+  if (btn) btn.textContent = isOpen ? '閉じる' : '詳細';
   // update sub-progress
   const item = ITEMS.find(i => i.id === id);
   if (item) {
@@ -552,7 +558,7 @@ function resetAll() {
               <span class="check-icon">✓</span>
             </div>
             <span class="item-label">${item.label}</span>
-            <button class="hint-toggle" onclick="toggleHint(${item.id}, event)" title="対応策を見る">?</button>
+            <button class="hint-toggle" onclick="toggleHint(${item.id}, event)" title="対応策を見る">詳細</button>
           </div>
           <div class="hint-panel" id="h${item.id}">
             <div class="hint-tag">💡 対応策・ヒント</div><br>
