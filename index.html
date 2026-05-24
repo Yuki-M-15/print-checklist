@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>印刷入稿データ チェックリスト</title>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #fafaf8;
+    --border: #e8e5de;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666660;
+    --text-muted: #999992;
+    --accent: #2c5f8a;
+    --accent-light: #e8f0f7;
+    --required: #b83228;
+    --required-bg: #fdf0ef;
+    --required-header: #f9eae8;
+    --required-border: #e8b0aa;
+    --recommended: #7a6a2a;
+    --recommended-bg: #fdf8e8;
+    --recommended-header: #faf5e0;
+    --recommended-border: #ddd080;
+    --check-color: #2e7d52;
+    --check-bg: #edf7f1;
+    --hint-bg: #f0f4f8;
+    --hint-border: #b8cfe0;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+    --shadow: 0 1px 4px rgba(0,0,0,0.09);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
+    --radius: 8px;
+    --radius-sm: 5px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 20px;
+  }
+  .header-left h1 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .header-left p {
+    font-size: 11.5px;
+    opacity: 0.72;
+    margin-top: 2px;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-text {
+    font-size: 12.5px;
+    opacity: 0.9;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-bar-outer {
+    width: 150px;
+    height: 7px;
+    background: rgba(255,255,255,0.22);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: #7ecfaa;
+    border-radius: 99px;
+    transition: width 0.35s ease;
+    width: 0%;
+  }
+  .reset-btn-header {
+    padding: 6px 14px;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.88);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .reset-btn-header:hover { background: rgba(255,255,255,0.2); }
+
+  /* ── Page layout ── */
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px 48px;
+  }
+
+  /* ── Completion banner ── */
+  .completion-banner {
+    background: var(--check-bg);
+    border: 1px solid #a8d9bc;
+    border-radius: var(--radius);
+    padding: 13px 20px;
+    text-align: center;
+    color: var(--check-color);
+    font-weight: 600;
+    margin-bottom: 24px;
+    display: none;
+    font-size: 14px;
+  }
+  .completion-banner.show { display: block; }
+
+  /* ── Priority section (大カテゴリ) ── */
+  .priority-section {
+    margin-bottom: 32px;
+  }
+
+  .priority-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border: 1px solid transparent;
+    border-bottom: none;
+  }
+  .priority-header.required {
+    background: var(--required-header);
+    border-color: var(--required-border);
+  }
+  .priority-header.recommended {
+    background: var(--recommended-header);
+    border-color: var(--recommended-border);
+  }
+
+  .priority-label {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .priority-header.required .priority-label { color: var(--required); }
+  .priority-header.recommended .priority-label { color: var(--recommended); }
+
+  .priority-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    flex: 1;
+  }
+  .priority-prog {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .priority-header.required .priority-prog { color: var(--required); }
+  .priority-header.recommended .priority-prog { color: var(--recommended); }
+
+  .priority-mini-bar {
+    width: 100px;
+    height: 5px;
+    border-radius: 99px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .priority-header.required .priority-mini-bar { background: #f0c8c4; }
+  .priority-header.recommended .priority-mini-bar { background: #e8dc9a; }
+  .priority-mini-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.35s ease;
+    width: 0%;
+  }
+  .priority-header.required .priority-mini-fill { background: var(--required); }
+  .priority-header.recommended .priority-mini-fill { background: var(--recommended); }
+
+  /* Body of priority section */
+  .priority-body {
+    border: 1px solid transparent;
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 16px 16px 4px;
+    background: var(--surface);
+  }
+  .priority-section:has(.priority-header.required) .priority-body {
+    border-color: var(--required-border);
+  }
+  .priority-section:has(.priority-header.recommended) .priority-body {
+    border-color: var(--recommended-border);
+  }
+
+  /* ── Sub-category group (小カテゴリ) ── */
+  .sub-group {
+    margin-bottom: 16px;
+  }
+  .sub-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 4px 8px;
+  }
+  .sub-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .sub-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+  }
+  .sub-progress {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Item card ── */
+  .item-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 5px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s, border-color 0.15s, opacity 0.2s;
+  }
+  .item-card:last-child { margin-bottom: 0; }
+  .item-card:hover { box-shadow: var(--shadow-md); border-color: #d4d0c8; }
+  .item-card.checked { opacity: 0.5; }
+  .item-card.checked .item-label { text-decoration: line-through; color: var(--text-muted); }
+  .item-card.open-hint {
+    border-color: var(--hint-border);
+    box-shadow: 0 0 0 2px rgba(44,95,138,0.1), var(--shadow);
+  }
+
+  .item-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Checkbox */
+  .custom-check {
+    width: 19px; height: 19px;
+    border: 2px solid #ccc8be;
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    background: #fff;
+  }
+  .item-card.checked .custom-check {
+    background: var(--check-color);
+    border-color: var(--check-color);
+  }
+  .check-icon { display: none; color: #fff; font-size: 11px; font-weight: 800; }
+  .item-card.checked .check-icon { display: block; }
+
+  .item-label { flex: 1; font-size: 13.5px; transition: color 0.15s; }
+
+  .hint-toggle {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    font-family: inherit;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .hint-toggle:hover,
+  .item-card.open-hint .hint-toggle {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--hint-border);
+  }
+
+  /* Hint panel */
+  .hint-panel {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: var(--hint-bg);
+    padding: 11px 14px 11px 45px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    border-left: 3px solid var(--accent);
+  }
+  .hint-panel.open { display: block; }
+  .hint-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>印刷入稿データ チェックリスト</h1>
+    <p>入稿前に全項目を確認してください</p>
+  </div>
+  <div class="header-right">
+    <div class="progress-wrap">
+      <span class="progress-text" id="progressText">0 / 21 完了</span>
+      <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
+    </div>
+    <button class="reset-btn-header" onclick="resetAll()">✕ リセット</button>
+  </div>
+</header>
+
+<div class="page">
+  <div class="completion-banner" id="completionBanner">
+    🎉 すべてのチェックが完了しました！入稿準備OKです。
+  </div>
+  <div id="mainContent"></div>
+</div>
+
+<script>
+const ITEMS = [
+  { id:1,  cat:"データ整理", label:"必要データが一つのフォルダに集約されている。",                     priority:"必須", hint:'ショートカット「Alt+Shift+Ctrl+P」を使用し、データをパッケージする。' },
+  { id:2,  cat:"文字",       label:"全てのテキストがアウトライン化されている。",                       priority:"必須", hint:'PDF入稿でフォント埋め込み済なら不要（印刷所ごとに変わる）。' },
+  { id:3,  cat:"カラー",     label:"ドキュメントとリンク画像のカラーモードがCMYKに設定されている。",    priority:"必須", hint:'リンク画像も同様の処理を行うこと。' },
+  { id:4,  cat:"画像",       label:"画像のリンクが外れていない、または埋め込みされている。",            priority:"必須", hint:'入稿用デザインデータとリンク画像フォルダは必ず同一階層に格納すること。' },
+  { id:5,  cat:"画像",       label:"リンク画像の解像度が適切に設定されている。",                       priority:"必須", hint:'基本的に300〜350dpiが推奨。ポスターなど大サイズの場合は解像度を適宜下げる。' },
+  { id:6,  cat:"版下",       label:"適切なサイズでトリムマークが作成されている。",                     priority:"必須", hint:'線に色指定が入っていると、線幅込みで作成されてしまうので注意。' },
+  { id:7,  cat:"版下",       label:"塗りたし3mmが確保されている。",                                   priority:"必須", hint:'断裁ズレで白地が出ないよう、背景を外側に3mm伸ばす。' },
+  { id:8,  cat:"特殊加工",   label:"トムソン加工やシール印刷などの場合、指定の入稿仕様に沿っている。",  priority:"必須", hint:'カットパスの作成や専用レイヤーの作成、塗りたしの指定が異なります。' },
+  { id:9,  cat:"保存形式",   label:"PDF入稿の場合、保存形式がPDF x-1aに設定されている。",             priority:"必須", hint:'入稿規定に沿った標準的な保存形式ですが、印刷所によって異なるので注意。' },
+  { id:10, cat:"保存形式",   label:"印刷会社に対応するバージョンでデータが作成されている。",            priority:"必須", hint:'新聞広告など印刷所によって古いバージョン形式で保存する必要があります。' },
+  { id:11, cat:"データ整理", label:"孤立点が削除されている。",                                        priority:"推奨", hint:'選択時に邪魔になるため。現在の出力機ではほぼ問題なし。' },
+  { id:12, cat:"データ整理", label:"ロックが全解除されている。",                                      priority:"推奨", hint:'PDF入稿時は不要。Ai入稿時は整理のために推奨。' },
+  { id:13, cat:"データ整理", label:"非表示のオブジェクトがなく、全て表示されている。",                 priority:"推奨", hint:'不要なレイヤーが残っていないかの確認。' },
+  { id:14, cat:"文字",       label:"異体字が反映されている。",                                        priority:"推奨", hint:'フォントによって異体字が登録されていない場合があるので注意。' },
+  { id:15, cat:"カラー",     label:"不要なスウォッチが削除されている。",                               priority:"推奨", hint:'不使用の特色など、未使用のスウォッチは可能な限り削除すること。' },
+  { id:16, cat:"カラー",     label:"0.25pt以下の細い線が使用されていないか確認する。",                 priority:"推奨", hint:'細い線は印刷で消える可能性があるため確認。' },
+  { id:17, cat:"カラー",     label:"オーバープリントの設定が解除されている。",                         priority:"推奨", hint:'意図しない色の出方が発生するため、属性パネルでチェックが外れているか確認。' },
+  { id:18, cat:"カラー",     label:"黒100%によるオーバープリントが考慮されている。",                   priority:"推奨", hint:'黒100%は自動的にオーバープリントになるため、それを考慮したデータの作りか確認。' },
+  { id:19, cat:"画像",       label:"画像サイズが適切にリサイズされている。",                           priority:"推奨", hint:'大きすぎないように縮小させることで、画質向上とデータ容量が削減できる。' },
+  { id:20, cat:"版下",       label:"版下データ外に不要なデータが残っていない。",                       priority:"推奨", hint:'データ容量の削減および、引き継ぎ時の混乱を避ける。' },
+  { id:21, cat:"保存形式",   label:"別名保存時に「PDFの互換性」のチェックが外れている。",              priority:"推奨", hint:'データ容量を大幅に削減できるが、WEB上の入稿データチェック機能を通す場合は必須の場合がある。' },
+];
+
+const CAT_COLORS = {
+  "データ整理": "#8b5cf6",
+  "文字":       "#0ea5e9",
+  "カラー":     "#f97316",
+  "画像":       "#22c55e",
+  "版下":       "#ef4444",
+  "特殊加工":   "#ec4899",
+  "保存形式":   "#14b8a6",
+};
+
+const PRIORITIES = [
+  { key: "必須", cls: "required",     desc: "入稿前に必ず確認してください" },
+  { key: "推奨", cls: "recommended",  desc: "品質向上・トラブル防止のために推奨" },
+];
+
+const state = { checked: new Set(), openHint: null };
+
+try {
+  const saved = localStorage.getItem('printChecklist_v2');
+  if (saved) JSON.parse(saved).forEach(id => state.checked.add(id));
+} catch(e) {}
+
+function save() {
+  try { localStorage.setItem('printChecklist_v2', JSON.stringify([...state.checked])); } catch(e) {}
+}
+
+function toggleCheck(id, e) {
+  e.stopPropagation();
+  state.checked.has(id) ? state.checked.delete(id) : state.checked.add(id);
+  save();
+  refreshCard(id);
+  refreshProgress();
+}
+
+function toggleHint(id, e) {
+  e.stopPropagation();
+  state.openHint = (state.openHint === id) ? null : id;
+  ITEMS.forEach(item => refreshCard(item.id));
+}
+
+function refreshCard(id) {
+  const card = document.getElementById('c' + id);
+  if (!card) return;
+  const hintEl = document.getElementById('h' + id);
+  const isChecked = state.checked.has(id);
+  const isOpen = state.openHint === id;
+  card.classList.toggle('checked', isChecked);
+  card.classList.toggle('open-hint', isOpen);
+  if (hintEl) hintEl.classList.toggle('open', isOpen);
+  const btn = card.querySelector('.hint-toggle');
+  if (btn) btn.textContent = isOpen ? '▲' : '?';
+  // update sub-progress
+  const item = ITEMS.find(i => i.id === id);
+  if (item) refreshSubProg(item.priority, item.cat);
+  refreshPriorityProg(item.priority);
+}
+
+function refreshSubProg(priority, cat) {
+  const key = priority + '_' + cat;
+  const relevant = ITEMS.filter(i => i.priority === priority && i.cat === cat);
+  const done = relevant.filter(i => state.checked.has(i.id)).length;
+  const el = document.getElementById('sp_' + key);
+  if (el) el.textContent = done + ' / ' + relevant.length;
+}
+
+function refreshPriorityProg(priority) {
+  const relevant = ITEMS.filter(i => i.priority === priority);
+  const done = relevant.filter(i => state.checked.has(i.id)).length;
+  const total = relevant.length;
+  const progEl = document.getElementById('pp_' + priority);
+  const fillEl = document.getElementById('pf_' + priority);
+  if (progEl) progEl.textContent = done + ' / ' + total;
+  if (fillEl) fillEl.style.width = (done / total * 100) + '%';
+}
+
+function refreshProgress() {
+  const total = ITEMS.length;
+  const done = state.checked.size;
+  document.getElementById('progressText').textContent = done + ' / ' + total + ' 完了';
+  document.getElementById('progressBar').style.width = (done / total * 100) + '%';
+  document.getElementById('completionBanner').classList.toggle('show', done === total);
+}
+
+function resetAll() {
+  if (!confirm('すべてのチェックをリセットしますか？')) return;
+  state.checked.clear();
+  state.openHint = null;
+  save();
+  ITEMS.forEach(item => refreshCard(item.id));
+  PRIORITIES.forEach(p => refreshPriorityProg(p.key));
+  refreshProgress();
+}
+
+// ── Build DOM ──
+(function build() {
+  const container = document.getElementById('mainContent');
+
+  PRIORITIES.forEach(p => {
+    const priorityItems = ITEMS.filter(i => i.priority === p.key);
+    const total = priorityItems.length;
+
+    // Section wrapper
+    const section = document.createElement('div');
+    section.className = 'priority-section';
+
+    // Priority header
+    const hdr = document.createElement('div');
+    hdr.className = 'priority-header ' + p.cls;
+    hdr.innerHTML = `
+      <span class="priority-label">${p.key}</span>
+      <span class="priority-desc">${p.desc}</span>
+      <span class="priority-prog" id="pp_${p.key}">0 / ${total}</span>
+      <div class="priority-mini-bar">
+        <div class="priority-mini-fill" id="pf_${p.key}"></div>
+      </div>
+    `;
+    section.appendChild(hdr);
+
+    // Priority body
+    const body = document.createElement('div');
+    body.className = 'priority-body';
+
+    // Sub-categories within this priority
+    const cats = [...new Set(priorityItems.map(i => i.cat))];
+    cats.forEach(cat => {
+      const catItems = priorityItems.filter(i => i.cat === cat);
+      const color = CAT_COLORS[cat] || '#888';
+      const key = p.key + '_' + cat;
+
+      const subGroup = document.createElement('div');
+      subGroup.className = 'sub-group';
+
+      const subHdr = document.createElement('div');
+      subHdr.className = 'sub-header';
+      subHdr.innerHTML = `
+        <span class="sub-dot" style="background:${color}"></span>
+        <span class="sub-name">${cat}</span>
+        <span class="sub-progress" id="sp_${key}">0 / ${catItems.length}</span>
+      `;
+      subGroup.appendChild(subHdr);
+
+      catItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.id = 'c' + item.id;
+        card.innerHTML = `
+          <div class="item-main" onclick="toggleHint(${item.id}, event)">
+            <div class="custom-check" onclick="toggleCheck(${item.id}, event)">
+              <span class="check-icon">✓</span>
+            </div>
+            <span class="item-label">${item.label}</span>
+            <button class="hint-toggle" onclick="toggleHint(${item.id}, event)" title="対応策を見る">?</button>
+          </div>
+          <div class="hint-panel" id="h${item.id}">
+            <div class="hint-tag">💡 対応策・ヒント</div><br>
+            ${item.hint}
+          </div>
+        `;
+        subGroup.appendChild(card);
+      });
+
+      body.appendChild(subGroup);
+    });
+
+    section.appendChild(body);
+    container.appendChild(section);
+  });
+
+  // Apply saved state
+  ITEMS.forEach(item => {
+    if (state.checked.has(item.id)) refreshCard(item.id);
+  });
+  PRIORITIES.forEach(p => refreshPriorityProg(p.key));
+  refreshProgress();
+})();
+</script>
+</body>
+</html>
