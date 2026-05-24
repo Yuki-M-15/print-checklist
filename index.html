@@ -218,9 +218,11 @@
   }
   .priority-section:has(.priority-header.required) .priority-body {
     border-color: var(--required-border);
+    background: var(--required-bg);
   }
   .priority-section:has(.priority-header.recommended) .priority-body {
     border-color: var(--recommended-border);
+    background: var(--recommended-bg);
   }
 
   /* ── Sub-category group (小カテゴリ) ── */
@@ -449,8 +451,10 @@ function refreshCard(id) {
   if (btn) btn.textContent = isOpen ? '▲' : '?';
   // update sub-progress
   const item = ITEMS.find(i => i.id === id);
-  if (item) refreshSubProg(item.priority, item.cat);
-  refreshPriorityProg(item.priority);
+  if (item) {
+    refreshSubProg(item.priority, item.cat);
+    refreshPriorityProg(item.priority);
+  }
 }
 
 function refreshSubProg(priority, cat) {
