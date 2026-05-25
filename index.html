@@ -384,6 +384,58 @@
     color: var(--accent);
     margin-bottom: 4px;
   }
+
+  /* ── Responsive ── */
+
+  /* 720px 以下：ヘッダーを2行に折り返す（タブを下段へ） */
+  @media (max-width: 720px) {
+    header {
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      row-gap: 10px;
+      align-items: center;
+    }
+    .header-left {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .header-left h1 {
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-left p { display: none; }
+    .tab-group {
+      order: 10;
+      flex: 0 0 100%;
+    }
+    .tab-btn {
+      flex: 1;
+      text-align: center;
+    }
+    .progress-bar-outer { width: 100px; }
+    .page { padding: 20px 16px 40px; }
+  }
+
+  /* 480px 以下：進捗バーを非表示にしてコンパクト化 */
+  @media (max-width: 480px) {
+    header { padding: 10px 12px; }
+    .progress-wrap { display: none; }
+    .priority-header {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 14px;
+    }
+    .priority-desc {
+      flex: 0 0 100%;
+      order: 10;
+    }
+    .priority-mini-bar { display: none; }
+    .item-main { padding: 10px 12px; gap: 10px; }
+    .page { padding: 16px 12px 32px; }
+  }
 </style>
 </head>
 <body>
