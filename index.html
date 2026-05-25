@@ -57,7 +57,7 @@
   header {
     background: var(--accent);
     color: #fff;
-    padding: 18px 32px;
+    padding: 14px 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -77,6 +77,40 @@
     opacity: 0.72;
     margin-top: 2px;
   }
+
+  /* ── Tab group ── */
+  .tab-group {
+    display: flex;
+    gap: 3px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 9px;
+    padding: 3px;
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.68);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+  }
+  .tab-btn.active {
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+  }
+  .tab-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.9);
+  }
+
   .header-right {
     display: flex;
     align-items: center;
@@ -357,7 +391,11 @@
 <header>
   <div class="header-left">
     <h1 onclick="window.scrollTo({top:0,behavior:'smooth'})" style="cursor:pointer;" title="トップへ戻る">入稿データ チェックリスト</h1>
-    <p>入稿前に全項目を確認してください</p>
+    <p id="headerDesc">入稿前に全項目を確認してください</p>
+  </div>
+  <div class="tab-group">
+    <button class="tab-btn active" id="tabDesigner" onclick="switchTab('designer')">デザイナー向け</button>
+    <button class="tab-btn" id="tabNonDesigner" onclick="switchTab('non-designer')">非デザイナー向け</button>
   </div>
   <div class="header-right">
     <div class="progress-wrap">
@@ -378,7 +416,10 @@
 </div>
 
 <script>
-const ITEMS = [
+// ════════════════════════════════════════════
+// ── デザイナー向け Items ──
+// ════════════════════════════════════════════
+const ITEMS_D = [
   // ── 必須 ──
   { id:1,  cat:"データ整理", label:"パッケージ機能を使い、入稿データをまとめた。",                                                                           priority:"必須", hint:'メニューのファイル内もしくはショートカット「Alt+Shift+Ctrl+P」で機能が使えます。InDesignにも同様の機能があります。' },
   { id:2,  cat:"データ整理", label:"入稿時にオンラインの自動データチェックを用いる場合、aiデータの保存時に「PDF互換ファイルを作成」にチェックを入れた。",     priority:"必須", hint:'別名保存時にチェック欄が表示されます。' },
@@ -407,7 +448,7 @@ const ITEMS = [
   { id:24, cat:"保存形式",   label:"オンライン上のデータチェックを用いないため「PDF互換ファイルを作成」のチェックを外して保存した。",                           priority:"推奨", hint:'データ容量を大幅に削減できますが、オンライン上の入稿データチェック機能を使う場合はチェックが必要です。' },
 ];
 
-const CAT_COLORS = {
+const CAT_COLORS_D = {
   "データ整理": "#8b5cf6",
   "文字":       "#0ea5e9",
   "カラー":     "#f97316",
@@ -417,25 +458,78 @@ const CAT_COLORS = {
   "保存形式":   "#14b8a6",
 };
 
-const PRIORITIES = [
-  { key: "必須", cls: "required",     desc: "印刷トラブル防止のため、入稿前に必ず確認してください。" },
-  { key: "推奨", cls: "recommended",  desc: "品質向上・データを流用する際の使いやすさの観点で確認してください。" },
+const PRIORITIES_D = [
+  { key: "必須", cls: "required",    desc: "印刷トラブル防止のため、入稿前に必ず確認してください。" },
+  { key: "推奨", cls: "recommended", desc: "品質向上・データを流用する際の使いやすさの観点で確認してください。" },
 ];
 
-const state = { checked: new Set(), openHint: null };
+// ════════════════════════════════════════════
+// ── 非デザイナー向け Items ──
+// ════════════════════════════════════════════
+const ITEMS_ND = [
+  // ── 必須 ──
+  { id:101, cat:"ファイル形式", label:"印刷用のPDFとして書き出した（Canvaは「PDF（印刷用）」、PowerPointは「エクスポート」→「PDF作成」を使用）。",                            priority:"必須", hint:'Canvaの場合：「共有」→「ダウンロード」→ファイルの種類を「PDF（印刷用）」に設定してください。PowerPointの場合：「ファイル」→「エクスポート」→「PDF/XPSドキュメントの作成」を選択。JPGやPNGなど画像ファイルでの入稿は、画質劣化の原因になる場合があります。' },
+  { id:102, cat:"サイズ確認",   label:"仕上がりサイズが依頼書・指示書の指定通りになっている（A4・A3・名刺サイズなど）。",                                                     priority:"必須", hint:'データ上の「アートボードサイズ」や「スライドサイズ」が実際の仕上がりサイズと合っているか確認しましょう。異なる場合、印刷時に拡大・縮小されてレイアウトが崩れることがあります。' },
+  { id:103, cat:"テキスト確認", label:"電話番号・日付・住所・金額・固有名詞など重要な情報に誤りがない。",                                                                     priority:"必須", hint:'数字は特に見落としやすいため、元の資料と照らし合わせながら1文字ずつ確認することを推奨します。印刷後の修正は刷り直しになり、コストと時間が大幅にかかります。' },
+  { id:104, cat:"素材・権利",   label:"使用している写真・イラスト・ロゴはすべて商用・印刷利用が許可された素材である（ネット検索画像の無断使用なし）。",                     priority:"必須", hint:'Google検索でヒットした画像は著作権があり、無断使用は法律違反になる場合があります。CRAZY社内の素材・Adobe Stock・利用規約を確認済みのフリー素材サイトの画像を使用してください。不明な場合はデザイン担当者に確認を。' },
+  { id:105, cat:"レビュー確認", label:"クリエイティブ室のデザイン担当者にデータを共有し、最終確認を依頼した。",                                                               priority:"必須", hint:'印刷物は入稿後の修正が非常に難しく、刷り直しになると大きなコストが発生します。自己判断で入稿せず、必ずデザイン担当者のチェックを経てから進めてください。' },
+  // ── 推奨 ──
+  { id:106, cat:"テキスト確認", label:"自分以外の人に全文を声に出して読んでもらい、誤字脱字・言い回しのミスがないか確認した。",                                               priority:"推奨", hint:'声に出して読むと、目で追うだけでは気づかない誤りを発見しやすくなります。また、作成した翌日など時間をおいてから再確認することも効果的です。' },
+  { id:107, cat:"レビュー確認", label:"上長・法務など関係部署の確認・承認を得た（名前・価格・キャンペーン内容など承認が必要な情報が含まれる場合）。",                         priority:"推奨", hint:'社名・役職・価格・キャンペーン期間など、正確性が求められる情報や、対外的に公表される内容は、関係者の承認を経てから入稿してください。' },
+  { id:108, cat:"ファイル形式", label:"ファイル名に日付またはバージョン番号が入っており、最新版であることがわかる（例: 20260525_チラシ_v2.pdf）。",                           priority:"推奨", hint:'同名の古いバージョンと混同すると、誤ったデータを入稿するリスクがあります。ファイル名に日付（YYYYMMDD形式）とバージョン番号（v1、v2…）をつける習慣をつけましょう。' },
+  { id:109, cat:"素材・権利",   label:"スマートフォン写真・スクリーンショット・LINEで受け取った低解像度画像を使用していない（または使用している場合はデザイン担当者に確認済み）。", priority:"推奨", hint:'スマートフォン写真やスクリーンショットは解像度が低く、印刷すると粗くなることがあります（モニターでは綺麗に見えていても印刷で差が出ます）。使用したい場合は事前にデザイン担当者に相談してください。' },
+  { id:110, cat:"サイズ確認",   label:"端ギリギリに配置した重要な文字・ロゴがないか確認した（印刷は端から3mm程度が断裁されます）。",                                           priority:"推奨", hint:'印刷物は断裁時に最大2〜3mmのズレが生じます。電話番号・ロゴ・重要なテキストは端から余裕を持って配置してください。また背景色は逆に端より外まで伸ばす必要があります（塗り足し）。不安な場合はデザイン担当者に確認を。' },
+];
+
+const CAT_COLORS_ND = {
+  "ファイル形式": "#14b8a6",
+  "テキスト確認": "#0ea5e9",
+  "素材・権利":   "#ec4899",
+  "サイズ確認":   "#8b5cf6",
+  "レビュー確認": "#f97316",
+};
+
+const PRIORITIES_ND = [
+  { key: "必須", cls: "required",    desc: "入稿前に必ず確認してください。確認漏れは刷り直しの原因になります。" },
+  { key: "推奨", cls: "recommended", desc: "ミスの防止・品質向上のため、確認を推奨します。" },
+];
+
+// ════════════════════════════════════════════
+// ── State 管理 ──
+// ════════════════════════════════════════════
+let currentMode = 'designer';
+
+const stateD  = { checked: new Set(), openHint: null };
+const stateND = { checked: new Set(), openHint: null };
 
 try {
   const saved = localStorage.getItem('printChecklist_v3');
-  if (saved) JSON.parse(saved).forEach(id => state.checked.add(id));
+  if (saved) JSON.parse(saved).forEach(id => stateD.checked.add(id));
 } catch(e) {}
 
+try {
+  const savedND = localStorage.getItem('printChecklist_nd_v1');
+  if (savedND) JSON.parse(savedND).forEach(id => stateND.checked.add(id));
+} catch(e) {}
+
+// ── ヘルパー ──
+function currentItems()      { return currentMode === 'designer' ? ITEMS_D      : ITEMS_ND;      }
+function currentState()      { return currentMode === 'designer' ? stateD       : stateND;       }
+function currentCatColors()  { return currentMode === 'designer' ? CAT_COLORS_D : CAT_COLORS_ND; }
+function currentPriorities() { return currentMode === 'designer' ? PRIORITIES_D : PRIORITIES_ND; }
+function currentStorageKey() { return currentMode === 'designer' ? 'printChecklist_v3' : 'printChecklist_nd_v1'; }
+
+// ════════════════════════════════════════════
+// ── Core 関数 ──
+// ════════════════════════════════════════════
 function save() {
-  try { localStorage.setItem('printChecklist_v3', JSON.stringify([...state.checked])); } catch(e) {}
+  try { localStorage.setItem(currentStorageKey(), JSON.stringify([...currentState().checked])); } catch(e) {}
 }
 
 function toggleCheck(id, e) {
   e.stopPropagation();
-  state.checked.has(id) ? state.checked.delete(id) : state.checked.add(id);
+  const s = currentState();
+  s.checked.has(id) ? s.checked.delete(id) : s.checked.add(id);
   save();
   refreshCard(id);
   refreshProgress();
@@ -443,23 +537,24 @@ function toggleCheck(id, e) {
 
 function toggleHint(id, e) {
   e.stopPropagation();
-  state.openHint = (state.openHint === id) ? null : id;
-  ITEMS.forEach(item => refreshCard(item.id));
+  const s = currentState();
+  s.openHint = (s.openHint === id) ? null : id;
+  currentItems().forEach(item => refreshCard(item.id));
 }
 
 function refreshCard(id) {
   const card = document.getElementById('c' + id);
   if (!card) return;
   const hintEl = document.getElementById('h' + id);
-  const isChecked = state.checked.has(id);
-  const isOpen = state.openHint === id;
+  const s = currentState();
+  const isChecked = s.checked.has(id);
+  const isOpen = s.openHint === id;
   card.classList.toggle('checked', isChecked);
   card.classList.toggle('open-hint', isOpen);
   if (hintEl) hintEl.classList.toggle('open', isOpen);
   const btn = card.querySelector('.hint-toggle');
   if (btn) btn.textContent = isOpen ? '閉じる' : '詳細';
-  // update sub-progress
-  const item = ITEMS.find(i => i.id === id);
+  const item = currentItems().find(i => i.id === id);
   if (item) {
     refreshSubProg(item.priority, item.cat);
     refreshPriorityProg(item.priority);
@@ -468,15 +563,19 @@ function refreshCard(id) {
 
 function refreshSubProg(priority, cat) {
   const key = priority + '_' + cat;
-  const relevant = ITEMS.filter(i => i.priority === priority && i.cat === cat);
-  const done = relevant.filter(i => state.checked.has(i.id)).length;
+  const items = currentItems();
+  const s = currentState();
+  const relevant = items.filter(i => i.priority === priority && i.cat === cat);
+  const done = relevant.filter(i => s.checked.has(i.id)).length;
   const el = document.getElementById('sp_' + key);
   if (el) el.textContent = done + ' / ' + relevant.length;
 }
 
 function refreshPriorityProg(priority) {
-  const relevant = ITEMS.filter(i => i.priority === priority);
-  const done = relevant.filter(i => state.checked.has(i.id)).length;
+  const items = currentItems();
+  const s = currentState();
+  const relevant = items.filter(i => i.priority === priority);
+  const done = relevant.filter(i => s.checked.has(i.id)).length;
   const total = relevant.length;
   const progEl = document.getElementById('pp_' + priority);
   const fillEl = document.getElementById('pf_' + priority);
@@ -485,36 +584,55 @@ function refreshPriorityProg(priority) {
 }
 
 function refreshProgress() {
-  const total = ITEMS.length;
-  const done = state.checked.size;
+  const items = currentItems();
+  const s = currentState();
+  const total = items.length;
+  const done = items.filter(i => s.checked.has(i.id)).length;
   document.getElementById('progressText').textContent = done + ' / ' + total + ' 完了';
   document.getElementById('progressBar').style.width = (done / total * 100) + '%';
   document.getElementById('completionBanner').classList.toggle('show', done === total);
 }
 
 function resetAll() {
-  if (!confirm('すべてのチェックをリセットしますか？')) return;
-  state.checked.clear();
-  state.openHint = null;
+  if (!confirm('このリストのチェックをすべてリセットしますか？')) return;
+  const s = currentState();
+  s.checked.clear();
+  s.openHint = null;
   save();
-  ITEMS.forEach(item => refreshCard(item.id));
-  PRIORITIES.forEach(p => refreshPriorityProg(p.key));
+  currentItems().forEach(item => refreshCard(item.id));
+  currentPriorities().forEach(p => refreshPriorityProg(p.key));
   refreshProgress();
 }
 
-// ── Build DOM ──
-(function build() {
-  const container = document.getElementById('mainContent');
+// ── タブ切り替え ──
+function switchTab(mode) {
+  if (currentMode === mode) return;
+  currentMode = mode;
+  document.getElementById('tabDesigner').classList.toggle('active', mode === 'designer');
+  document.getElementById('tabNonDesigner').classList.toggle('active', mode === 'non-designer');
+  document.getElementById('headerDesc').textContent =
+    mode === 'designer'
+      ? '入稿前に全項目を確認してください'
+      : '入稿データを送る前に全項目を確認してください';
+  rebuild();
+}
 
-  PRIORITIES.forEach(p => {
-    const priorityItems = ITEMS.filter(i => i.priority === p.key);
+// ── DOM 構築 ──
+function rebuild() {
+  const container = document.getElementById('mainContent');
+  container.innerHTML = '';
+  const items = currentItems();
+  const priorities = currentPriorities();
+  const catColors = currentCatColors();
+  const s = currentState();
+
+  priorities.forEach(p => {
+    const priorityItems = items.filter(i => i.priority === p.key);
     const total = priorityItems.length;
 
-    // Section wrapper
     const section = document.createElement('div');
     section.className = 'priority-section';
 
-    // Priority header
     const hdr = document.createElement('div');
     hdr.className = 'priority-header ' + p.cls;
     hdr.innerHTML = `
@@ -527,15 +645,13 @@ function resetAll() {
     `;
     section.appendChild(hdr);
 
-    // Priority body
     const body = document.createElement('div');
     body.className = 'priority-body';
 
-    // Sub-categories within this priority
     const cats = [...new Set(priorityItems.map(i => i.cat))];
     cats.forEach(cat => {
       const catItems = priorityItems.filter(i => i.cat === cat);
-      const color = CAT_COLORS[cat] || '#888';
+      const color = catColors[cat] || '#888';
       const key = p.key + '_' + cat;
 
       const subGroup = document.createElement('div');
@@ -577,13 +693,16 @@ function resetAll() {
     container.appendChild(section);
   });
 
-  // Apply saved state
-  ITEMS.forEach(item => {
-    if (state.checked.has(item.id)) refreshCard(item.id);
+  // 保存済み状態を反映
+  items.forEach(item => {
+    if (s.checked.has(item.id)) refreshCard(item.id);
   });
-  PRIORITIES.forEach(p => refreshPriorityProg(p.key));
+  priorities.forEach(p => refreshPriorityProg(p.key));
   refreshProgress();
-})();
+}
+
+// 初回描画
+rebuild();
 </script>
 </body>
 </html>
